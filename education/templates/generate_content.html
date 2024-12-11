@@ -1,0 +1,601 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn With Topics</title>
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <style>
+        @keyframes underlineCycle {
+            0% { text-decoration-color: red; }
+            25% { text-decoration-color: orange; }
+            50% { text-decoration-color: yellow; }
+            75% { text-decoration-color: green; }
+            100% { text-decoration-color: blue; }
+        }
+
+        .underline-cycling {
+            position: relative;
+            display: inline-block;
+            text-decoration: none; 
+        }
+
+        .underline-cycling::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -8px; 
+            height: 10px; 
+            width: 100%;
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, red);
+            background-size: 200% 100%;
+            background-position: 100% 0;
+            animation: underlineCycle 3s linear infinite;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content {
+            flex: 1; /* This makes the content area grow to fill available space */
+        }
+
+        footer {
+            flex-shrink: 0; /* Prevent the footer from shrinking */
+        }
+
+        .link {
+            color: #09024e; /* Bootstrap primary color */
+            padding: 5px 10px;
+            border: 2px solid #007BFF; /* Blue border */
+            border-radius: 5px; /* Rounded corners */
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+        }
+
+        .link:hover {
+            background-color: #007BFF; /* Blue background on hover */
+            color: white; /* White text on hover */
+            transform: translateY(-2px); /* Slight lift effect */
+        }
+    </style>
+</head>
+<body class="bg-blue-300 flex flex-col min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-blue-200 p-4 border-b-4 border-blue-300">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <a href="{% url 'home' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 underline-cycling">LearningSmart</a>
+            <div class="space-x-4">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="link">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="link">Login</a>
+                {% endif %}
+                <a href="{% url 'ask_question' %}" class="link">AskMe-&-Learn</a>
+                <a href="{% url 'index' %}" class="link">Voice-Assistant</a>
+                <a href="{% url 'capture_solution' %}" class="link">Grade-My-Work</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="mb-4">
+        <a href="{% url 'select_subject' %}" class="text-blue-500 font-semibold hover:text-gray-700 inline-flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Back
+        </a>
+    </div>
+
+    <!-- Main content area -->
+    <div class="flex-grow flex flex-wrap justify-center p-4 content">
+        <div class="flex-grow flex items-start justify-start w-full md:w-1/2 p-2 h-full">
+            <div class="bg-gray-300 items-start shadow-lg rounded-lg w-full p-6 h-full">
+                <div class="mt-4 flex flex-col h-full">
+                    <h2 class="text-xl font-semibold">Read For Me:</h2>
+                    {% if audio_file_url %}
+                    <audio id="audioPlayer" class="mt-2" controls>
+                        <source src="{{ audio_file_url }}" type="audio/mp3">
+                        Your browser does not support the audio tag.
+                    </audio>           
+                    {% endif %}
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <label for="topic" class="block text-lg font-medium mb-2">Select a topic:</label>
+                        <select name="topic" id="topic" class="form-select block w-full mb-4">
+                            <option value="">Select</option>
+                            <!-- Topics will be populated here based on the subject -->
+                        </select>
+                        <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Submit</button>
+                    </form>
+                    <h2 class="text-xl font-semibold mt-4">Read the Passage to Learn:</h2>
+                    <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex-grow max-h-5xl overflow-y-auto">
+                        <p>{{ answer }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-grow flex items-start justify-start w-full md:w-1/2 p-2 h-full">
+            <div class="bg-gray-300 items-start shadow-lg rounded-lg w-full p-6 h-full">
+                <div class="mt-4 flex flex-col h-full"> 
+                    <h2 class="text-xl font-semibold mt-4">Visual Tutorial:</h2>
+                    <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex-grow">
+                        <div class="flex flex-col space-y-4">
+                            {% if image_urls|length == 0 %}
+                                <h2 class="text-center">No images available at the moment.</h2>
+                            {% else %}
+                                {% for image in image_urls %}
+                                    <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                        <img src="{{ image }}" alt="Image related to {{ topic }}" class="absolute inset-0 w-full h-full object-cover rounded-md" />
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>                                
+                </div>
+            </div>
+        </div>  
+    </div>
+
+    <script>
+        // Hard-coded topics based on subject ID stored in session
+        const topics = {
+            '1': [ // Subject ID 1
+                { id: 'nouns', name: 'Nouns' },
+                { id: 'verbs', name: 'Verbs' },
+                { id: 'grammar', name: 'Grammar' },
+                { id: 'punctuation', name: 'Punctuation' },
+                { id: 'Phonics & Spelling', name: 'Phonics & Spelling' },
+                { id: 'Handwriting and Writing', name: 'Handwriting and Writing' },
+            ],
+            '2': [ // Subject ID 2
+                { id: 'shapes', name: 'Using Shapes' },
+                { id: 'Count to 100', name: 'Count to 100' },
+                { id: 'Add and subtract 2-digit numbers', name: 'Add and subtract 2-digit numbers' },
+                { id: 'Represent numbers on a number line', name: 'Represent numbers on a number line' },
+                { id: 'Write the date; tell time; read a calendar', name: 'Write the date; tell time; read a calendar' },
+                { id: 'Identify, sort and classify 2-dimensional shapes', name: 'Identify, sort and classify 2-dimensional shapes' },
+            ],
+            '4': [ // Subject ID 4
+                { id: 'Homophones', name: 'Homophones' },
+                { id: 'Homographs', name: 'Homographs' },
+                { id: 'Literary terms', name: 'Literary terms' },
+                { id: 'Parts of speech', name: 'Parts of speech' },
+                { id: 'Reading comprehension', name: 'Reading comprehension' },
+                { id: 'Language and vocabulary', name: 'Language and vocabulary' },
+                { id: 'Parts of speech and usage', name: 'Parts of speech and usage' },
+                { id: 'Vocabulary skilss and word usage', name: 'Vocabulary skilss and word usage' },
+                { id: 'Punctuation and sentence structure', name: 'Punctuation and sentence structure' },
+                { id: 'Plural Noun Definiton, Rules and Examples', name: 'Plural Noun Definiton, Rules and Examples' },
+            ],
+            '5': [ // Subject ID 5
+                { id: 'Numbers, Operations and relationships', name: 'Numbers, Operations and relationships' },
+                { id: 'Patterns, Functions and algebra', name: 'Patterns, Functions and algebra' },
+                { id: 'Measurements', name: 'Measurements' },
+                { id: 'Space and shape (geometry)', name: 'Space and shape (geometry)' },
+                { id: 'Numbers Systems', name: 'Numbers Systems' },
+                { id: 'Data Handling', name: 'Data Handling' },
+                { id: 'Fractions and their Types', name: 'Fractions and their Types' },
+                { id: 'Arithmetic Operations', name: 'Arithmetic Operations' },
+            ],
+            '6': [ // Subject ID 6
+                { id: 'Atmosphere', name: ' Atmosphere' },
+                { id: 'Periodic Table', name: ' Periodic Table' },
+                { id: 'Energy & Change', name: 'Energy & Change' },
+                { id: 'Matter & Materials', name: 'Matter & Materials' },
+                { id: 'Formulae & equations', name: 'Formulae & equations' },
+                { id: 'Lithosphere & Mining', name: 'Lithosphere & Mining' },
+                { id: 'Plant & animal cells.', name: 'Plant & animal cells.' },
+                { id: 'Human systems', name: 'Patterns, Functions and algebra' },
+            ],
+            '7': [ // Subject ID 7
+                { id: 'Trade', name: 'Trade' },
+                { id: 'Weather', name: 'Weather' },
+                { id: 'Population', name: 'Population' },
+                { id: 'Food and farming', name: 'Food and farming' },
+                { id: 'Minerals and mining', name: 'Minerals and mining' },
+                { id: 'Climate and vegetation', name: 'Climate and vegetation' },
+                { id: 'continents and countries', name: 'continents and countries' },
+                { id: 'Democracy and citizenship', name: 'Democracy and citizenship' },
+                { id: 'Hunter gatheres and herders', name: 'Hunter gatheres and herders' },
+                { id: 'African kingdom: Mapungubwe', name: 'African kingdom: Mapungubwe' },
+                { id: 'Heritage trail of our provinces', name: 'Heritage trail of our provinces' },
+                { id: 'Reading and interpreting various types of maps', name: 'Reading and interpreting various types of maps' },
+            ],
+            '10': [ // Subject ID 10
+                { id: 'Equations', name: 'Equations' },
+                { id: 'Expressions', name: 'Expressions' },
+                { id: 'Whole numbers', name: 'Whole numbers' },
+                { id: 'Geometry of 2-D shapes', name: 'Geometry of 2-D shapes' },
+                { id: 'decimals and fractions', name: 'decimals and fractions' },
+                { id: 'Constructing geometric objects', name: 'Constructing geometric objects' },
+                { id: 'Rational and irrational numbers', name: 'Rational and irrational numbers' },
+                { id: 'Exponents (squares, cubes and roots)', name: 'Exponents (squares, cubes and roots)' },
+            ],
+           '11': [ // Subject ID 11
+                { id: 'Variation', name: 'Variation' },
+                { id: 'Biodiversity', name: 'Biodiversity' },
+                { id: 'The Biosphere', name: 'The Biosphere' },
+                { id: 'Sources of energy', name: 'Sources of energy' },
+                { id: 'Sexual reproduction', name: 'Sexual reproduction' },
+                { id: 'Heat: Energy transfer', name: 'Heat: Energy transfer' },
+                { id: 'Properties of materials', name: 'Properties of materials' },
+                { id: 'Life and Living Glossary', name: 'Life and Living Glossary' },
+                { id: 'Potential and kinetic energy', name: 'Potential and kinetic energy' },
+                { id: 'Matter and Materials Glossary', name: 'Matter and Materials Glossary' },
+                { id: 'The Periodic Table of Elements', name: 'The Periodic Table of Elements' },
+                { id: 'Acids, bases and neutral substances', name: ' Acids, bases and neutral substances' },
+            ],
+            '12': [ // Subject ID 12
+                { id: 'Materials and their properties', name: 'Materials and their properties' },
+                { id: 'Electrical systems and control', name: 'Electrical systems and control' },
+                { id: 'Mechanical systems and control', name: 'Mechanical systems and control' },
+                { id: 'Designing shelters for refugees', name: 'Designing shelters for refugees' },
+            ],
+            '13': [ // Subject ID 13
+                { id: 'Map skills', name: 'Map skills' },
+                { id: 'Population growth and change', name: 'Population growth and change' },
+                { id: 'The Trans-Atlantic slave trade', name: 'The Trans-Atlantic slave trade' },
+                { id: 'Volcanoes, earthquakes and floods', name: 'Volcanoes, earthquakes and floods' },
+                { id: ' Colonisation of the Cape 17th–18th centuries', name: ' Colonisation of the Cape 17th–18th centuries' },
+                { id: 'Natural resources and conservation in South Africa', name: 'Natural resources and conservation in South Africa' },
+                { id: 'The kingdom of Mali and the city of Timbuktu in the 14th century', name: 'The kingdom of Mali and the city of Timbuktu in the 14th century' },
+                { id: 'Co-operation and conflict on the frontiers of the Cape Colony in the early 19th century', name: 'Co-operation and conflict on the frontiers of the Cape Colony in the early 19th century' },
+            ],
+            '14': [ // Subject ID 14
+                { id: 'The Economy', name: 'The Economy' },
+                { id: 'Entrepreneurship', name: 'Entrepreneurship' },
+                { id: 'Financial Literacy', name: 'Financial Literacy' },
+            ],
+            '16': [ // Subject ID 15
+                { id: 'Algebra', name: 'Algebra' },
+                { id: 'Theorems', name: 'Theorems' },
+                { id: 'Geometry', name: 'Geometry' },
+                { id: 'Functions', name: 'Functions' },
+                { id: 'Probability', name: 'Probability' },
+                { id: 'Trigonometry', name: 'Trigonometry' },
+                { id: 'Graphs of line', name: 'Graphs of line' },
+                { id: 'Linear Functions', name: 'Linear Functions' },
+                { id: 'Reciprocal ratios', name: 'Reciprocal ratios' },
+                { id: 'Quadratic Functions', name: 'Quadratic Functions' },
+                { id: 'Exponents and Roots', name: 'Exponents and Roots' },
+                { id: 'Solving inequalities', name: 'Solving inequalities' },
+                { id: 'Perimeter, Area, and Volume', name: 'Perimeter, Area, and Volume' },
+            ],
+            '17': [ // Subject ID 17
+                { id: 'Measurement', name: 'Measurement' },
+                { id: 'Data Handling', name: 'Data Handling' },
+                { id: 'Space and Shape', name: 'Space and Shape' },
+                { id: 'Financial Mathematics', name: 'Financial Mathematics' },
+                { id: 'Pattern and Functions', name: 'Patterns and Functions' },
+                { id: 'Numbers, Operations, and Relationships', name: 'Numbers, Operations, and Relationships' },
+            ],
+            '18': [ // Subject ID 18
+                { id: 'Chemical Systems', name: 'Chemical Systems' },
+                { id: 'Energy and Change', name: 'Energy and Change' },
+                { id: 'Matter and Materials', name: 'Matter and Materials' },
+                { id: 'Waves, Sound, and Light', name: 'Waves, Sound, and Light' },
+                { id: 'Newton’s laws of motion', name: 'Newton’s laws of motion' },
+            ],
+            '19': [ // Subject ID 19
+                { id: 'Genetics and Evolution', name: 'Genetics and Evolution' },
+                { id: 'Life at the Cellular Level', name: 'Life at the Cellular Level' },
+                { id: 'Human Anatomy and Physiology', name: 'Human Anatomy and Physiology' },
+                { id: 'Biodiversity and Conservation', name: 'Biodiversity and Conservation' },
+            ],
+            '20': [ // Subject ID 20
+                { id: 'Human Geography', name: 'Human Geography' },
+                { id: 'Physical Geography', name: 'Physical Geography' },
+                { id: 'Environmental Geography', name: 'Environmental Geography' },
+                { id: 'Mapping Skills and Techniques', name: 'Mapping Skills and Techniques' },
+            ],
+            '21': [ // Subject ID 21
+                { id: 'Ledger Accounts', name: 'Ledger Accounts' },
+                { id: 'Bank Reconciliation', name: 'Bank Reconciliation' },
+                { id: 'Financial Statements', name: 'Financial Statements' },
+                { id: 'Basic Accounting Concepts', name: 'Basic Accounting Concepts' },
+                { id: 'Source Documents and Books of Original Entry', name: 'Source Documents and Books of Original Entry' },
+            ],
+            '22': [ // Subject ID 22
+                { id: 'Business Management', name: 'Business Management' },
+                { id: 'Business Operations', name: 'Business Operations' },
+                { id: 'Business Activities', name: 'Business Activities' },
+                { id: 'Business and Society', name: 'Business and Society' },
+                { id: 'Business Environment', name: 'Business Environment' },
+            ],
+            '24': [ // Subject ID 25
+                { id: 'Functions', name: 'Functions' },
+                { id: 'Statistics', name: 'Statistics' },
+                { id: 'Measurement', name: 'Measurement' },
+                { id: 'Probability', name: 'Probability' },
+                { id: 'Euclidean geometry', name: 'Euclidean geometry' },
+                { id: 'Quadratic Functions', name: 'Quadratic Functions' },
+                { id: 'Exponents and surds', name: 'Exponents and surds' },
+                { id: 'Analytical geometry', name: 'Analytical geometry' },
+                { id: 'Finance growth and decay', name: 'Finance growth and decay' },
+                { id: 'Equations and inequalities', name: 'Equations and inequalities' },
+            ],
+            '25': [ // Subject ID 25
+                { id: 'Measurement', name: 'Measurement' },
+                { id: 'Data Handling', name: 'Data Handling' },
+                { id: 'Space and Shape', name: 'Space and Shape' },
+                { id: 'Financial Mathematics', name: 'Financial Mathematics' },
+                { id: 'Patterns and Functions', name: 'Patterns and Functions' },
+                { id: 'Numbers, Operations, and Relationships', name: 'Numbers, Operations, and Relationships' },
+            ],
+            '26': [ // Subject ID 26
+                { id: 'Mechanics', name: 'Mechanics' },
+                { id: 'Waves & Gases.', name: 'Waves & Gases.' },
+                { id: 'Chemical Change', name: 'Chemical Change' },
+                { id: 'Nature of Matter', name: 'Nature of Matter' },
+                { id: 'Electricity and Magnetism', name: 'Electricity and Magnetism' },
+            ],
+            '27': [ // Subject ID 27
+                { id: 'Microorganisms and Disease', name: 'Microorganisms and Disease' },
+                { id: 'Ecology and the Environment', name: 'Ecology and the Environment' },
+                { id: 'Plant and Animal Life Processes', name: 'Plant and Animal Life Processes' },
+                { id: 'Human Reproduction and Development', name: 'Human Reproduction and Development' },
+            ],
+            '28': [ // Subject ID 28
+                { id: 'Geomorphology', name: 'Geomorphology' },
+                { id: 'Theory - Climatology', name: 'Theory - Climatology' },
+                { id: 'Geographic skills and techniques', name: 'Geographic skills and techniques' },
+                { id: 'Settlement and Economic Geography', name: 'Settlement and Economic Geography' },
+                { id: 'Geographical Skills and Techniques (Mapwork)', name: 'Geographical Skills and Techniques (Mapwork)' },
+            ],
+            '29': [ // Subject ID 29
+                { id: 'Budgeting', name: 'Budgeting' },
+                { id: 'Fixed assets', name: 'Fixed assets' },
+                { id: 'Value added tax', name: 'Value added tax' },
+                { id: 'Inventory system', name: 'Inventory system' },
+                { id: 'Accounts(financial statements)', name: 'Accounts(financial statements)' },
+                { id: 'Partnerships(analysis and interpretation)', name: 'Partnerships(analysis and interpretation)' },
+                { id: 'Cost accounting(calculations, general ledger)', name: 'Cost accounting(calculations, general ledger)' },
+            ],
+            '30': [ // Subject ID 30
+                { id: 'Entrepreneurship', name: 'Entrepreneurship' },
+                { id: 'Business Economics', name: 'Business Economics' },
+                { id: 'Business Functions', name: 'Business Functions' },
+                { id: 'Financial Management', name: 'Financial Management' },
+                { id: 'Global Business Environment', name: 'Global Business Environment' },
+            ],
+            '32': [ // Subject ID 32
+                { id: 'Trigonometric graphs', name: 'Trigonometric graphs' },
+                { id: 'Sequences and series', name: 'Sequences and series' },
+                { id: 'The nature of graphs', name: 'The nature of graphs' },
+                { id: 'Functions and graphs', name: 'Functions and graphs' },
+                { id: 'Financial Management', name: 'Financial Management' },
+                { id: 'Trigonometric functions', name: 'Trigonometric functions' },
+                { id: 'Trigonometric Identities', name: 'Trigonometric Identities' },
+                { id: 'Statistics and probability', name: 'Statistics and probability' },
+                { id: 'Polymonial and rational functions', name: 'Polymonial and rational functions' },
+                { id: 'Exponential and logarithms functions', name: 'Exponential and logarithms functions' },
+                { id: 'Systems of equations and inequalities', name: 'Systems of equations and inequalities' },
+                { id: 'Vectors, parametric equations and polarnequations', name: 'Vectors, parametric equations and polarnequations' },
+            ],
+            '33': [ // Subject ID 33
+                { id: 'Probability', name: 'Probability' },
+                { id: 'Finance(taxation)', name: 'Finance(taxation)' },
+                { id: 'Finance(exchange rates)', name: 'Finance(exchange rates)' },
+                { id: 'Measurement (conversions and time)', name: 'Measurement (conversions and time)' },
+                { id: 'Numbers and calculations with numbers', name: 'Numbers and calculations with numbers' },
+                { id: 'finance(interest, banking, inflation)', name: 'finance(interest, banking, inflation)' },
+                { id: 'Measurement (perimeter, area, and volume)', name: 'Measurement (perimeter, area, and volume)' },
+                { id: 'Patterns, relationships and representations', name: 'Patterns, relationships and representations' },
+                { id: 'Income/expenditure, profit/loss and break-even analysis', name: 'Income/expenditure, profit/loss and break-even analysis' },
+                { id: 'Measurement (measuring length, weight, volume, temperature)', name: 'Measurement (measuring length, weight, volume, temperature)' },
+                { id: 'Maps, plans and other representations of the physical world(models and plans)', name: 'Maps, plans and other representations of the physical world(models and plans)' },
+                { id: 'Maps, plans and other representations of the physical world(scale and map work)', name: 'Maps, plans and other representations of the physical world(scale and map work)' },
+            ],
+            '34': [ // Subject ID 34
+                { id: 'Atoms', name: 'Atoms' },
+                { id: 'Energy', name: 'Energy' },
+                { id: 'Nuclei', name: 'Nuclei' },
+                { id: 'Momentum', name: 'Momentum' },
+                { id: 'Magnetism', name: 'Magnetism' },
+                { id: 'Wave optics', name: 'Wave optics' },
+                { id: 'Electrostatics', name: 'Electrostatics' },
+                { id: 'Electric charge', name: 'Electric charge' },
+                { id: 'Electric circuits', name: 'Electric circuits' },
+                { id: 'Current electricity', name: 'Current electricity' },
+                { id: 'Alternating current', name: 'Alternating current' },
+                { id: 'Chemical equilibrium', name: 'Chemical equilibrium' },
+                { id: 'Dual matter and radiation', name: 'Dual matter and radiation' },
+                { id: 'Classical electromagnetism', name: 'Classical electromagnetism' },
+                { id: 'Moving charges and magnetism', name: 'Moving charges and magnetism' },
+                { id: 'Ray optics and optical instruments', name: 'Ray optics and optical instruments' },
+                { id: 'Propagation of electromagnetic wave', name: 'Propagation of electromagnetic wave' },
+            ],
+            '35': [ // Subject ID 35
+                { id: 'Meiosis', name: 'Meiosis' },
+                { id: 'Genetics', name: 'Genetics' },
+                { id: 'Evolution', name: 'Evolution' },
+                { id: 'Human evolution', name: 'Human evolution' },
+                { id: 'Human reproduction', name: 'Human reproduction' },
+                { id: 'Homeostasis in humans', name: 'Homeostasis in humans' },
+                { id: 'DNA: The code of life', name: 'DNA: The code of life' },
+                { id: 'Human endocrine system', name: 'Human endocrine system' },
+                { id: 'Reproduction in vertebrates', name: 'Reproduction in vertebrates' },
+                { id: 'Responding to the environmrnt(plants)', name: 'Responding to the environmrnt(plants)' },
+                { id: 'Responding to the environment (humans)', name: 'Responding to the environment (humans)' },
+            ],
+            '36': [ // Subject ID 37
+                { id: 'Geomorphology', name: 'Geomorphology' },
+                { id: 'Climate and weather', name: 'Climate and weather' },
+                { id: 'Geographical skills and techniques', name: 'Geographical skills and techniques' },
+                { id: 'Economic geography of south africa', name: 'Economic geography of south africa' },
+                { id: 'Rural settlement and urban settlement', name: 'Rural settlement and urban settlement' },
+            ],
+            '37': [ // Subject ID 37
+                { id: 'Budgeting', name: 'Budgeting' },
+                { id: 'Reconciliations', name: 'Reconciliations' },
+                { id: 'Cost accounting', name: 'Cost accounting' },
+                { id: 'Value added tax', name: 'Value added tax' },
+                { id: 'Inventory sytem', name: 'Inventory sytem' },
+                { id: 'Unique transactions', name: 'Unique transactions' },
+                { id: 'Ethics fixed assets', name: 'Ethics fixed assets' },
+                { id: 'Analysis and interpretation', name: 'Analysis and interpretation' },
+                { id: 'Close corporations internal control', name: 'Close corporations internal control' },
+                { id: 'Final accounts, financial statements and notes', name: 'Final accounts, financial statements and notes' },
+                { id: 'Analysis of publishe financial statements and audit reports', name: 'Analysis of publishe financial statements and audit reports' },
+            ],
+            '38': [ // Subject ID 38
+                { id: 'Creative thinking', name: 'Creative thinking' },
+                { id: 'Investment-insurance', name: 'Investment-insurance' },
+                { id: 'Investment-securities', name: 'Investment-securities' },
+                { id: 'Human resources function', name: 'Human resources function' },
+                { id: 'Management and leadership', name: 'Management and leadership' },
+                { id: 'Professionalism and ethics', name: 'Professionalism and ethics' },
+                { id: 'Business sectors and their environment', name: 'Business sectors and their environment' },
+                { id: 'Impact of recent legislation on business', name: 'Impact of recent legislation on business' },
+                { id: 'Quality of performance within business functions', name: 'Quality of performance within business functions' },
+                { id: 'Team performance assessment and conflict management', name: 'Team performance assessment and conflict management' },
+                { id: 'Forms of ownership and their impact on the business operation', name: 'Forms of ownership and their impact on the business operation' },
+                { id: 'Concept of coporate social responsibility, human rights, inclusivity and environmental issues', name: 'Concept of coporate social responsibility, human rights, inclusivity and environmental issues' },
+                { id: 'Devise strategiest for a business to use in its response to the challenges of the macro business environment', name: 'Devise strategiest for a business to use in its response to the challenges of the macro business environment' },
+            ],
+            '41': [ // Subject ID 41
+                { id: 'The Economy', name: 'The Economy' },
+                { id: 'Entrepreneurship', name: 'Entrepreneurship' },
+                { id: 'Personal Finance', name: 'Personal Finance' },
+                { id: 'Money and Banking', name: 'Money and Banking' },
+                { id: 'Financial Literacy', name: 'Financial Literacy' },
+                { id: 'Consumer Awareness', name: 'Consumer Awareness' },
+                { id: 'Business Principles', name: 'Business Principles' },
+                { id: 'Economic Challenges', name: 'Economic Challenges' },
+                { id: 'Business Operations', name: 'Business Operations' },
+                { id: 'Economic Principles', name: 'Economic Principles' },
+                { id: 'Basic Business Skills', name: 'Basic Business Skills' },
+                { id: 'The Role of Government', name: 'The Role of Government' },
+                { id: 'Consumer Rights and Responsibilities', name: 'Consumer Rights and Responsibilities' },
+                { id: 'Introduction to Economic and Management Sciences', name: 'Introduction to Economic and Management Sciences' },
+            ],
+            '43': [ // Subject ID 43
+                { id: 'Integers', name: 'Integers' },
+                { id: 'Inequalities', name: 'Inequalities' },
+                { id: 'Whole Numbers', name: 'Whole Numbers' },
+                { id: 'Rational Numbers', name: 'Rational Numbers' },
+                { id: 'Basic Probability', name: 'Basic Probability' },
+                { id: 'Graphs and Charts', name: 'Graphs and Charts' },
+                { id: 'Properties of Shapes', name: 'Properties of Shapes' },
+                { id: 'Expressions and Equations', name: 'Expressions and Equations' },
+                { id: 'Perimeter, Area, and Volume', name: 'Perimeter, Area, and Volume' },
+            ],
+            '44': [ // Subject ID 44
+                { id: 'Earth and Beyond', name: 'Earth and Beyond' },
+                { id: 'Cells and Systems', name: 'Cells and Systems' },
+                { id: 'Energy and Change', name: 'Energy and Change' },
+                { id: 'Matter and Materials', name: 'Matter and Materials' },
+                { id: 'Scientific Investigations', name: 'Scientific Investigations' },
+            ],
+            '46': [ // Subject ID 45
+                { id: 'Human Geography', name: 'Human Geography' },
+                { id: 'Global Conflicts', name: 'Global Conflicts' },
+                { id: 'Economic Geography', name: 'Economic Geography' },
+                { id: 'Physical Geography', name: 'Physical Geography' },
+                { id: 'Climate and Weather', name: 'Climate and Weather' },
+                { id: 'The Rise of Empires', name: 'The Rise of Empires' },
+                { id: 'Environmental Issues', name: 'Environmental Issues' },
+                { id: 'The Early Civilizations', name: 'The Early Civilizations' },
+                { id: 'Introduction to History', name: 'Introduction to History' },
+                { id: 'The Industrial Revolution', name: 'The Industrial Revolution' },
+                { id: 'Maps and Geographic Skills', name: 'Maps and Geographic Skills' },
+                { id: 'Colonization and its Impact', name: 'Colonization and its Impact' },
+                { id: 'Colonialism in South Africa', name: 'Colonialism in South Africa' },
+            ],
+            '47': [ // Subject ID 47
+                { id: 'Design Process', name: 'Design Process' },
+                { id: 'Sustainable Design', name: 'Sustainable Design' },
+                { id: 'Electrical Systems', name: 'Electrical Systems' },
+                { id: 'Systems and Control', name: 'Systems and Control' },
+                { id: 'Advanced Design Process', name: 'Advanced Design Process' },
+                { id: 'Understanding Technology', name: 'Understanding Technology' },
+                { id: 'Structures and Mechanisms', name: 'Structures and Mechanisms' },
+                { id: 'Materials and Manufacturing', name: 'Materials and Manufacturing' },
+                { id: 'Materials and Their Properties', name: 'Materials and Their Properties' },
+                { id: 'Technical Drawing and Communication', name: 'Technical Drawing and Communication' },
+                { id: 'Information and Communication Technology', name: 'Information and Communication Technology' },
+            ],
+        };
+        
+        // Get the subject ID from session storage (or pass it from the server if needed)
+        const subjectId = '{{ request.session.subject_id }}'; // Ensure this value is available
+        
+        // Populate topics based on selected subject
+        const topicSelect = document.getElementById('topic');
+        if (topics[subjectId]) {
+            topics[subjectId].forEach(topic => {
+                const option = document.createElement('option');
+                option.value = topic.id;
+                option.textContent = topic.name;
+                topicSelect.appendChild(option);
+            });
+        }
+    </script>
+    
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-white text-xl mb-4 font-semibold">Quick Links</h3>
+                    <div class="space-y-2">
+                        <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">
+                            <i class="fas fa-arrow-right text-blue-400 mr-2"></i>Home
+                        </a>
+                        <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">
+                            <i class="fas fa-arrow-right text-blue-400 mr-2"></i>Login
+                        </a>
+                        <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">
+                            <i class="fas fa-arrow-right text-blue-400 mr-2"></i>SignUp
+                        </a>
+                        <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">
+                            <i class="fas fa-arrow-right text-blue-400 mr-2"></i>Latest Blog
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-white text-xl mb-4 font-semibold">Get In Touch</h3>
+                    <p class="mb-2 flex items-center"><i class="fas fa-envelope text-blue-400 mr-2"></i>info@example.com</p>
+                    <p class="flex items-center"><i class="fas fa-phone text-blue-400 mr-2"></i>+000 000 0000</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-white text-xl mb-4 font-semibold">Follow Us</h3>
+                    <div class="flex space-x-4">
+                        <a class="bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 transition" href="#">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a class="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 transition" href="#">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a class="bg-blue-700 text-white rounded-full p-3 hover:bg-blue-800 transition" href="#">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a class="bg-pink-500 text-white rounded-full p-3 hover:bg-pink-600 transition" href="#">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bottom Section -->
+    <div class="bg-gray-900 text-white py-4">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="mb-2 md:mb-0">&copy; <a class="text-white border-b border-white hover:border-transparent" href="#">Your Site Name</a>. All Rights Reserved.</p>
+                <p class="mb-0">Designed by <a class="text-white border-b border-white hover:border-transparent" href="#">Pule</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
