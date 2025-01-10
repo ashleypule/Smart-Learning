@@ -63,20 +63,43 @@
     <nav class="bg-blue-200 p-4 border-b-4 border-blue-300">
         <div class="container mx-auto flex justify-between items-center px-4">
             <a href="{% url 'home' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 underline-cycling">LearningSmart</a>
-            <div class="space-x-4">
+            <!-- Mobile Hamburger Menu -->
+            <div class="lg:hidden flex items-center">
+                <button id="navbar-toggle" class="text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Navigation links (Hidden on mobile, shown on larger screens) -->
+            <div class="space-x-4 hidden lg:flex">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Logout</a>
+                    <a href="{% url 'logout' %}" class="text-blue-800 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Logout</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Login</a>
                 {% endif %}
                 <a href="{% url 'ask_question' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">AskMe-&-Learn</a>
                 <a href="{% url 'index' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Voice-Assistant</a>
+                <a href="{% url 'correct_essay' %}" class="btn border border-blue-500 text-blue-500 text-lg font-semibold px-2 py-1 rounded">Essay-Correction</a>
                 <a href="{% url 'capture_solution' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Grade-My-Work</a>
             </div>
         </div>
+
+        <!-- Mobile Menu (Initially hidden) -->
+        <div id="mobile-menu" class="lg:hidden hidden bg-blue-200">
+            <a href="{% url 'home' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="block text-blue-800 text-lg font-semibold hover:text-gray-700 py-2 px-4">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Login</a>
+            {% endif %}
+            <a href="{% url 'ask_question' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">AskMe-&-Learn</a>
+            <a href="{% url 'index' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Voice-Assistant</a>
+            <a href="{% url 'correct_essay' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Essay-Correction</a>
+            <a href="{% url 'capture_solution' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Grade-My-Work</a>
+        </div>
     </nav>
     
-
     <div class="mb-4">
         <a href="{% url 'select_school_level' %}" class="text-blue-500 font-semibold hover:text-gray-700 inline-flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -87,25 +110,25 @@
     <!-- Main Content -->
     <div class="flex-grow container mx-auto mt-10 flex items-center justify-center">
         <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
-            <h1 class="text-2xl font-bold mb-4">Select Grade</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold mb-4">Select Grade</h1>
             <form method="post" action="">
                 {% csrf_token %}
                 <label for="grade" class="block text-gray-700 mb-2">Choose a grade:</label>
-                <select name="grade" id="grade" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+                <select name="grade" id="grade" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 text-sm sm:text-base">
                     <option value="select">Select</option>
                     {% for grade in grades %}
                         <option value="{{ grade.id }}">{{ grade.name }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Submit</button>
+                <button type="submit" class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm sm:text-lg">Submit</button>
             </form>
         </div>
     </div>
 
     <!-- Footer Section -->
-    <footer class="bg-gray-800 text-white py-12">
+    <footer class="bg-gray-800 text-white py-12 mt-10">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div>
                     <h3 class="text-white text-xl mb-4 font-semibold">Quick Links</h3>
                     <div class="space-y-2">
@@ -133,18 +156,10 @@
                 <div>
                     <h3 class="text-white text-xl mb-4 font-semibold">Follow Us</h3>
                     <div class="flex space-x-4">
-                        <a class="bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 transition" href="#">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a class="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 transition" href="#">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a class="bg-blue-700 text-white rounded-full p-3 hover:bg-blue-800 transition" href="#">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a class="bg-pink-500 text-white rounded-full p-3 hover:bg-pink-600 transition" href="#">
-                            <i class="fab fa-instagram"></i>
-                        </a>
+                        <a class="bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 transition" href="#">Twitter</a>
+                        <a class="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 transition" href="#">Facebook</a>
+                        <a class="bg-blue-700 text-white rounded-full p-3 hover:bg-blue-800 transition" href="#">LinkedIn</a>
+                        <a class="bg-pink-500 text-white rounded-full p-3 hover:bg-pink-600 transition" href="#">Instagram</a>
                     </div>
                 </div>
             </div>
@@ -154,12 +169,20 @@
     <!-- Bottom Section -->
     <div class="bg-gray-900 text-white py-4">
         <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <p class="mb-2 md:mb-0">&copy; <a class="text-white border-b border-white hover:border-transparent" href="#">Your Site Name</a>. All Rights Reserved.</p>
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <p class="mb-2 sm:mb-0">&copy; <a class="text-white border-b border-white hover:border-transparent" href="#">Your Site Name</a>. All Rights Reserved.</p>
                 <p class="mb-0">Designed by <a class="text-white border-b border-white hover:border-transparent" href="#">Pule</a></p>
             </div>
         </div>
     </div>
+
+    <script>
+        // Mobile Navbar Toggle
+        const navbarToggle = document.getElementById('navbar-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        navbarToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
 </body>
 </html>
-

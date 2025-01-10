@@ -24,4 +24,5 @@ urlpatterns = [
     path('capture_solution/', views.solution_capture_view, name='capture_solution'),
     path('edit/<int:solution_id>/', views.edit_solution, name='edit_solution'),
     path('detail/<int:solution_id>/', views.solution_detail, name='solution_detail'),
+    path('correct_essay/', views.correct_essay, name='correct_essay'),
 ]

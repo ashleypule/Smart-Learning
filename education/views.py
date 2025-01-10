@@ -42,6 +42,8 @@ import re
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import fitz 
+import language_tool_python
+from .forms import EssayForm
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai.api_key =  OPENAI_API_KEY
@@ -306,6 +308,29 @@ def ask_question(request):
     })
 
 
+def generate_answer(context):
+    start = time.process_time()
+    try:
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that provides comprehensive solutions."},
+                {"role": "user", "content": context}
+            ],
+            model="llama3-8b-8192",
+            temperature=0.5,
+            max_tokens=1024,
+            top_p=1,
+            stop=None,
+            stream=False,
+        )
+        answer = chat_completion.choices[0].message.content
+    except Exception as e:
+        print(f"Error generating answer: {e}")
+        answer = "Error generating answer."
+    end = time.process_time()
+    print(f"Processing time for generation: {end - start} seconds")
+    return answer
+    
 
 @login_required
 def generate_content(request):
@@ -378,14 +403,14 @@ def generate_content(request):
     })
 
 
-def google_image_search(api_key, cse_id, query, num_results=2):
+def google_image_search(api_key, cse_id, query, num_results=5):  # Increase the number of results
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
         'key': api_key,
         'cx': cse_id,
         'q': query,
         'searchType': 'image',
-        'num': num_results
+        'num': num_results  # Number of images to fetch
     }
     
     response = requests.get(url, params=params)
@@ -396,12 +421,6 @@ def google_image_search(api_key, cse_id, query, num_results=2):
     else:
         print("Error:", response.status_code, response.text)
         return []
-
-
-    def is_valid_answer(answer, selected_level, grade_name, subject_name):
-        if selected_level in answer and grade_name in answer and subject_name in answer:
-            return True
-        return False
 
 
 def is_valid_answer(answer, selected_level, grade_name, subject_name):
@@ -424,30 +443,6 @@ def is_valid_answer(answer, selected_level, grade_id, subject_id):
         return True
 
     return False
-
-
-def generate_answer(context):
-    start = time.process_time()
-    try:
-        chat_completion = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that provides comprehensive solutions."},
-                {"role": "user", "content": context}
-            ],
-            model="llama3-8b-8192",
-            temperature=0.5,
-            max_tokens=1024,
-            top_p=1,
-            stop=None,
-            stream=False,
-        )
-        answer = chat_completion.choices[0].message.content
-    except Exception as e:
-        print(f"Error generating answer: {e}")
-        answer = "Error generating answer."
-    end = time.process_time()
-    print(f"Processing time for generation: {end - start} seconds")
-    return answer
 
 
 def generate_quiz(request):
@@ -844,3 +839,21 @@ def solution_detail(request, solution_id):
     """Show details of the solution."""
     solution = Solution.objects.get(id=solution_id)
     return render(request, 'detail.html', {'solution': solution})
+
+tool = language_tool_python.LanguageTool('en-US')
+
+def correct_essay(request):
+    corrected_text = None
+    if request.method == 'POST':
+        form = EssayForm(request.POST)
+        if form.is_valid():
+            essay_text = form.cleaned_data['essay_text']
+            matches = tool.check(essay_text)
+            corrected_text = language_tool_python.utils.correct(essay_text, matches)
+    else:
+        form = EssayForm()
+
+    return render(request, 'correct_essay.html', {
+        'form': form,
+        'corrected_text': corrected_text,
+    })

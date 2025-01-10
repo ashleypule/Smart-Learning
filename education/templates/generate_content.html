@@ -9,33 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
     <style>
-        @keyframes underlineCycle {
-            0% { text-decoration-color: red; }
-            25% { text-decoration-color: orange; }
-            50% { text-decoration-color: yellow; }
-            75% { text-decoration-color: green; }
-            100% { text-decoration-color: blue; }
-        }
-
-        .underline-cycling {
-            position: relative;
-            display: inline-block;
-            text-decoration: none; 
-        }
-
-        .underline-cycling::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            bottom: -8px; 
-            height: 10px; 
-            width: 100%;
-            background: linear-gradient(90deg, red, orange, yellow, green, blue, red);
-            background-size: 200% 100%;
-            background-position: 100% 0;
-            animation: underlineCycle 3s linear infinite;
-        }
-
+        /* Ensuring the full height of body and main content area */
         html, body {
             height: 100%;
             margin: 0;
@@ -43,48 +17,99 @@
             flex-direction: column;
         }
 
+        /* Content area must take up the available space */
         .content {
-            flex: 1; /* This makes the content area grow to fill available space */
+            flex-grow: 1; /* Take up available space */
+            padding-bottom: 20px; /* Ensure some space before footer */
+            display: flex;
+            flex-wrap: wrap; /* Allow the panels to wrap on small screens */
+            justify-content: space-between;
+            margin-bottom: 80px; /* To prevent footer overlap */
+        }
+
+        .panel {
+            flex-direction: column;
+            height: 100%; /* Ensure equal height */
         }
 
         footer {
-            flex-shrink: 0; /* Prevent the footer from shrinking */
+            flex-shrink: 0; /* Ensure footer doesn't shrink */
+            background-color: #333;
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+
+        /* Footer styling */
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
         }
 
         .link {
-            color: #09024e; /* Bootstrap primary color */
             padding: 5px 10px;
-            border: 2px solid #007BFF; /* Blue border */
-            border-radius: 5px; /* Rounded corners */
+            border: 2px solid #007BFF;
+            border-radius: 5px;
             text-decoration: none;
             transition: background-color 0.3s, color 0.3s, transform 0.2s;
         }
 
         .link:hover {
-            background-color: #007BFF; /* Blue background on hover */
-            color: white; /* White text on hover */
-            transform: translateY(-2px); /* Slight lift effect */
+            background-color: #007BFF;
+            color: white;
+            transform: translateY(-2px);
         }
+
     </style>
 </head>
 <body class="bg-blue-300 flex flex-col min-h-screen">
+
     <!-- Navbar -->
     <nav class="bg-blue-200 p-4 border-b-4 border-blue-300">
         <div class="container mx-auto flex justify-between items-center px-4">
+            <!-- Logo or Site Name -->
             <a href="{% url 'home' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 underline-cycling">LearningSmart</a>
-            <div class="space-x-4">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}" class="link">Logout</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="link">Login</a>
-                {% endif %}
-                <a href="{% url 'ask_question' %}" class="link">AskMe-&-Learn</a>
-                <a href="{% url 'index' %}" class="link">Voice-Assistant</a>
-                <a href="{% url 'capture_solution' %}" class="link">Grade-My-Work</a>
+            
+            <!-- Mobile Hamburger Menu -->
+            <div class="lg:hidden flex items-center">
+                <button id="navbar-toggle" class="text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
+    
+            <!-- Navigation links (Hidden on mobile, shown on larger screens) -->
+            <div class="space-x-4 hidden lg:flex">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="text-blue-800 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Login</a>
+                {% endif %}
+                <a href="{% url 'ask_question' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">AskMe-&-Learn</a>
+                <a href="{% url 'index' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Voice-Assistant</a>
+                <a href="{% url 'correct_essay' %}" class="btn border border-blue-500 text-blue-500 text-lg font-semibold px-2 py-1 rounded">Essay-Correction</a>
+                <a href="{% url 'capture_solution' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Grade-My-Work</a>
+            </div>
+        </div>
+    
+        <!-- Mobile Menu (Initially hidden) -->
+        <div id="mobile-menu" class="lg:hidden hidden bg-blue-200">
+            <a href="{% url 'home' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="block text-blue-800 text-lg font-semibold hover:text-gray-700 py-2 px-4">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Login</a>
+            {% endif %}
+            <a href="{% url 'ask_question' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">AskMe-&-Learn</a>
+            <a href="{% url 'index' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Voice-Assistant</a>
+            <a href="{% url 'correct_essay' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Essay-Correction</a>
+            <a href="{% url 'capture_solution' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Grade-My-Work</a>
         </div>
     </nav>
 
+    <!-- Back Link -->
     <div class="mb-4">
         <a href="{% url 'select_subject' %}" class="text-blue-500 font-semibold hover:text-gray-700 inline-flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -93,54 +118,54 @@
     </div>
 
     <!-- Main content area -->
-    <div class="flex-grow flex flex-wrap justify-center p-4 content">
-        <div class="flex-grow flex items-start justify-start w-full md:w-1/2 p-2 h-full">
-            <div class="bg-gray-300 items-start shadow-lg rounded-lg w-full p-6 h-full">
-                <div class="mt-4 flex flex-col h-full">
-                    <h2 class="text-xl font-semibold">Read For Me:</h2>
-                    {% if audio_file_url %}
-                    <audio id="audioPlayer" class="mt-2" controls>
-                        <source src="{{ audio_file_url }}" type="audio/mp3">
-                        Your browser does not support the audio tag.
-                    </audio>           
-                    {% endif %}
-                    <form method="post" action="">
-                        {% csrf_token %}
-                        <label for="topic" class="block text-lg font-medium mb-2">Select a topic:</label>
-                        <select name="topic" id="topic" class="form-select block w-full mb-4">
-                            <option value="">Select</option>
-                            <!-- Topics will be populated here based on the subject -->
-                        </select>
-                        <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Submit</button>
-                    </form>
-                    <h2 class="text-xl font-semibold mt-4">Read the Passage to Learn:</h2>
-                    <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex-grow max-h-5xl overflow-y-auto">
-                        <p>{{ answer }}</p>
-                    </div>
+    <div class="content flex-grow flex-wrap justify-center p-4 mb-12">
+        <!-- Left Panel -->
+        <div class="flex-grow flex items-start justify-start w-full md:w-1/2 p-2">
+            <div class="bg-gray-300 items-start shadow-lg rounded-lg w-full p-6 panel">
+                <h2 class="text-xl font-semibold">Read For Me:</h2>
+                {% if audio_file_url %}
+                <audio id="audioPlayer" class="mt-2" controls>
+                    <source src="{{ audio_file_url }}" type="audio/mp3">
+                    Your browser does not support the audio tag.
+                </audio>           
+                {% endif %}
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <label for="topic" class="block text-lg font-medium mb-2">Select a topic:</label>
+                    <select name="topic" id="topic" class="form-select block w-full mb-4">
+                        <option value="">Select</option>
+                    </select>
+                    <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Submit</button>
+                </form>
+                <h2 class="text-xl font-semibold mt-4">Read the Passage to Learn:</h2>
+                <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex-grow max-h-5xl overflow-y-auto">
+                    <p>{{ answer }}</p>
                 </div>
             </div>
         </div>
-
-        <div class="flex-grow flex items-start justify-start w-full md:w-1/2 p-2 h-full">
-            <div class="bg-gray-300 items-start shadow-lg rounded-lg w-full p-6 h-full">
-                <div class="mt-4 flex flex-col h-full"> 
-                    <h2 class="text-xl font-semibold mt-4">Visual Tutorial:</h2>
-                    <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex-grow">
-                        <div class="flex flex-col space-y-4">
-                            {% if image_urls|length == 0 %}
-                                <h2 class="text-center">No images available at the moment.</h2>
-                            {% else %}
+    
+        <!-- Right Panel -->
+        <div class="flex items-start justify-start w-full md:w-1/2 p-2">
+            <div class="bg-gray-300 shadow-lg rounded-lg w-full p-6 flex flex-col panel">
+                <h2 class="text-xl font-semibold mt-4">Visual Tutorial:</h2>
+                <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex-grow">
+                    <div class="flex flex-col space-y-4">
+                        {% if image_urls|length == 0 %}
+                            <h2 class="text-center">No images available at the moment.</h2>
+                        {% else %}
+                            <!-- Scrollable Container for Vertical Scrolling -->
+                            <div class="overflow-y-auto max-h-80 py-4">
                                 {% for image in image_urls %}
-                                    <div class="relative w-full" style="padding-bottom: 56.25%;">
-                                        <img src="{{ image }}" alt="Image related to {{ topic }}" class="absolute inset-0 w-full h-full object-cover rounded-md" />
+                                    <div class="w-full mb-4">
+                                        <img src="{{ image }}" alt="Image related to {{ topic }}" class="w-full h-auto object-cover rounded-md" />
                                     </div>
                                 {% endfor %}
-                            {% endif %}
-                        </div>
-                    </div>                                
-                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>                                 
             </div>
-        </div>  
+        </div>               
     </div>
 
     <script>
@@ -539,63 +564,61 @@
         }
     </script>
     
-    <!-- Footer Section -->
-    <footer class="bg-gray-800 text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div>
-                    <h3 class="text-white text-xl mb-4 font-semibold">Quick Links</h3>
-                    <div class="space-y-2">
-                        <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">
-                            <i class="fas fa-arrow-right text-blue-400 mr-2"></i>Home
-                        </a>
-                        <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">
-                            <i class="fas fa-arrow-right text-blue-400 mr-2"></i>Login
-                        </a>
-                        <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">
-                            <i class="fas fa-arrow-right text-blue-400 mr-2"></i>SignUp
-                        </a>
-                        <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">
-                            <i class="fas fa-arrow-right text-blue-400 mr-2"></i>Latest Blog
-                        </a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-white text-xl mb-4 font-semibold">Get In Touch</h3>
-                    <p class="mb-2 flex items-center"><i class="fas fa-envelope text-blue-400 mr-2"></i>info@example.com</p>
-                    <p class="flex items-center"><i class="fas fa-phone text-blue-400 mr-2"></i>+000 000 0000</p>
-                </div>
-                
-                <div>
-                    <h3 class="text-white text-xl mb-4 font-semibold">Follow Us</h3>
-                    <div class="flex space-x-4">
-                        <a class="bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 transition" href="#">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a class="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 transition" href="#">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a class="bg-blue-700 text-white rounded-full p-3 hover:bg-blue-800 transition" href="#">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a class="bg-pink-500 text-white rounded-full p-3 hover:bg-pink-600 transition" href="#">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                    </div>
+    
+   <!-- Footer Section -->
+   <footer class="bg-gray-800 text-white py-12 flex-shrink-0">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-white text-xl mb-4 font-semibold">Quick Links</h3>
+                <div class="space-y-2">
+                    <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">Home</a>
+                    <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">Login</a>
+                    <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">SignUp</a>
+                    <a class="text-gray-400 hover:text-gray-300 flex items-center" href="#">Latest Blog</a>
                 </div>
             </div>
-        </div>
-    </footer>
-    
-    <!-- Bottom Section -->
-    <div class="bg-gray-900 text-white py-4">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <p class="mb-2 md:mb-0">&copy; <a class="text-white border-b border-white hover:border-transparent" href="#">Your Site Name</a>. All Rights Reserved.</p>
-                <p class="mb-0">Designed by <a class="text-white border-b border-white hover:border-transparent" href="#">Pule</a></p>
+            <div>
+                <h3 class="text-white text-xl mb-4 font-semibold">Get In Touch</h3>
+                <p class="mb-2 flex items-center"><i class="fas fa-envelope text-blue-400 mr-2"></i>info@example.com</p>
+                <p class="flex items-center"><i class="fas fa-phone text-blue-400 mr-2"></i>+000 000 0000</p>
+            </div>
+            <div>
+                <h3 class="text-white text-xl mb-4 font-semibold">Follow Us</h3>
+                <div class="flex space-x-4">
+                    <a class="bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 transition" href="#">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a class="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 transition" href="#">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a class="bg-blue-700 text-white rounded-full p-3 hover:bg-blue-800 transition" href="#">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a class="bg-pink-500 text-white rounded-full p-3 hover:bg-pink-600 transition" href="#">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
+</footer>
+
+<!-- Bottom Section -->
+<div class="bg-gray-900 text-white py-4">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <p class="mb-2 md:mb-0">&copy; <a class="text-white border-b border-white hover:border-transparent" href="#">Your Site Name</a>. All Rights Reserved.</p>
+            <p class="mb-0">Designed by <a class="text-white border-b border-white hover:border-transparent" href="#">Pule</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('navbar-toggle').addEventListener('click', function () {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+</script>
+
 </body>
 </html>

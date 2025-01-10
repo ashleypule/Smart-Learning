@@ -10,35 +10,25 @@
 
     <style>
         @keyframes underlineCycle {
-            0% {
-                text-decoration-color: red;
-            }
-            25% {
-                text-decoration-color: orange;
-            }
-            50% {
-                text-decoration-color: yellow;
-            }
-            75% {
-                text-decoration-color: green;
-            }
-            100% {
-                text-decoration-color: blue;
-            }
+            0% { text-decoration-color: red; }
+            25% { text-decoration-color: orange; }
+            50% { text-decoration-color: yellow; }
+            75% { text-decoration-color: green; }
+            100% { text-decoration-color: blue; }
         }
 
         .underline-cycling {
             position: relative;
             display: inline-block;
-            text-decoration: none; 
+            text-decoration: none;
         }
 
         .underline-cycling::after {
             content: "";
             position: absolute;
             left: 0;
-            bottom: -8px; 
-            height: 10px; 
+            bottom: -8px;
+            height: 10px;
             width: 100%;
             background: linear-gradient(90deg, red, orange, yellow, green, blue, red);
             background-size: 200% 100%;
@@ -66,30 +56,55 @@
     <!-- Navbar -->
     <nav class="bg-blue-200 p-4 border-b-4 border-blue-300">
         <div class="container mx-auto flex justify-between items-center px-4">
+            <!-- Logo or Site Name -->
             <a href="{% url 'home' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 underline-cycling">LearningSmart</a>
-            <div class="space-x-4">
+            
+            <!-- Mobile Hamburger Menu -->
+            <div class="lg:hidden flex items-center">
+                <button id="navbar-toggle" class="text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+    
+            <!-- Navigation links (Hidden on mobile, shown on larger screens) -->
+            <div class="space-x-4 hidden lg:flex">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Logout</a>
+                    <a href="{% url 'logout' %}" class="text-blue-800 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Logout</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Login</a>
                 {% endif %}
                 <a href="{% url 'ask_question' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">AskMe-&-Learn</a>
                 <a href="{% url 'index' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Voice-Assistant</a>
+                <a href="{% url 'correct_essay' %}" class="btn border border-blue-500 text-blue-500 text-lg font-semibold px-2 py-1 rounded">Essay-Correction</a>
                 <a href="{% url 'capture_solution' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Grade-My-Work</a>
             </div>
         </div>
-    </nav>
     
+        <!-- Mobile Menu (Initially hidden) -->
+        <div id="mobile-menu" class="lg:hidden hidden bg-blue-200">
+            <a href="{% url 'home' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="block text-blue-800 text-lg font-semibold hover:text-gray-700 py-2 px-4">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Login</a>
+            {% endif %}
+            <a href="{% url 'ask_question' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">AskMe-&-Learn</a>
+            <a href="{% url 'index' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Voice-Assistant</a>
+            <a href="{% url 'correct_essay' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Essay-Correction</a>
+            <a href="{% url 'capture_solution' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Grade-My-Work</a>
+        </div>
+    </nav>
 
     <div class="mb-4"></div>
-        <a href="{% url 'select_grade' %}" class="text-blue-500 font-semibold hover:text-gray-700 inline-flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-            Back
-        </a>
-    </div>
+    <a href="{% url 'select_grade' %}" class="text-blue-500 font-semibold hover:text-gray-700 inline-flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        Back
+    </a>
 
     <!-- Main Content -->
-    <div class="flex-grow container mx-auto mt-10 flex items-center justify-center">
+    <div class="flex-grow container mx-auto mt-10 mb-16 flex items-center justify-center">
         <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
             <h1 class="text-center text-2xl mb-4">Select Your Subject</h1>
             <form method="post" class="bg-white p-6 rounded shadow">
@@ -107,6 +122,7 @@
             </form>
         </div>
     </div>
+
     <!-- Footer Section -->
     <footer class="bg-gray-800 text-white py-12">
         <div class="container mx-auto px-4">
@@ -138,19 +154,11 @@
                 <div>
                     <h3 class="text-white text-xl mb-4 font-semibold">Follow Us</h3>
                     <div class="flex space-x-4">
-                        <a class="bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 transition" href="#">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a class="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 transition" href="#">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a class="bg-blue-700 text-white rounded-full p-3 hover:bg-blue-800 transition" href="#">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a class="bg-pink-500 text-white rounded-full p-3 hover:bg-pink-600 transition" href="#">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                    </div>
+                        <a class="bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 transition" href="#">Twitter</a>
+                        <a class="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 transition" href="#">Facebook</a>
+                        <a class="bg-blue-700 text-white rounded-full p-3 hover:bg-blue-800 transition" href="#">LinkedIn</a>
+                        <a class="bg-pink-500 text-white rounded-full p-3 hover:bg-pink-600 transition" href="#">Instagram</a>
+                    </div>>
                 </div>
             </div>
         </div>
@@ -165,6 +173,14 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Toggle mobile menu visibility on button click
+        document.getElementById('navbar-toggle').addEventListener('click', function() {
+            var mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+
 </body>
 </html>
-

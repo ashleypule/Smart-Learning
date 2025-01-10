@@ -28,3 +28,6 @@ class SolutionForm(forms.ModelForm):
     class Meta:
         model = Solution
         fields = ['image', 'user_edited_text']
+
+class EssayForm(forms.Form):
+    essay_text = forms.CharField(widget=forms.Textarea)

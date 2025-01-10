@@ -61,23 +61,49 @@
 </head>
 <body class="bg-blue-300 flex flex-col min-h-screen">
     <!-- Navbar -->
-    <nav class="bg-blue-200 p-4 border-b-4 border-blue-300"> 
+    <nav class="bg-blue-200 p-4 border-b-4 border-blue-300">
         <div class="container mx-auto flex justify-between items-center px-4">
+            <!-- Logo or Site Name -->
             <a href="{% url 'home' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 underline-cycling">LearningSmart</a>
-            <div class="flex space-x-2">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}" class="btn border border-blue-500 px-2 py-1 rounded">Logout</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn border border-blue-500 px-2 py-1 rounded">Login</a>
-                {% endif %}
-                <a href="{% url 'select_school_level' %}" class="btn border border-blue-500 px-2 py-1 rounded">Learn-With-Topics</a>
-                <a href="{% url 'index' %}" class="btn border border-blue-500 px-2 py-1 rounded">Voice-Assistant</a>
-                <a href="{% url 'capture_solution' %}" class="btn border border-blue-500 px-2 py-1 rounded">Grade-My-Work</a>
+            
+            <!-- Mobile Hamburger Menu -->
+            <div class="lg:hidden flex items-center">
+                <button id="navbar-toggle" class="text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
+    
+            <!-- Navigation links (Hidden on mobile, shown on larger screens) -->
+            <div class="space-x-4 hidden lg:flex">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="text-blue-800 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Login</a>
+                {% endif %}
+                <a href="{% url 'select_school_level' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Learn-With-Topics</a>
+                <a href="{% url 'index' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Voice-Assistant</a>
+                <a href="{% url 'correct_essay' %}" class="btn border border-blue-500 text-blue-500 text-lg font-semibold px-2 py-1 rounded">Essay-Correction</a>
+                <a href="{% url 'capture_solution' %}" class="text-blue-500 text-lg font-semibold hover:text-gray-700 border border-blue-500 px-2 py-1 rounded transition duration-200 hover:border-blue-700">Grade-My-Work</a>
+            </div>
+        </div>
+    
+        <!-- Mobile Menu (Initially hidden) -->
+        <div id="mobile-menu" class="lg:hidden hidden bg-blue-200">
+            <a href="{% url 'home' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="block text-blue-800 text-lg font-semibold hover:text-gray-700 py-2 px-4">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Login</a>
+            {% endif %}
+            <a href="{% url 'select_school_level' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Learn-With-Topics</a>
+            <a href="{% url 'index' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Voice-Assistant</a>
+            <a href="{% url 'correct_essay' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Essay-Correction</a>
+            <a href="{% url 'capture_solution' %}" class="block text-blue-500 text-lg font-semibold hover:text-gray-700 py-2 px-4">Grade-My-Work</a>
         </div>
     </nav>
     
-
     <div class="mb-4">
         <a href="{% url 'generate_content' %}" class="text-blue-500 font-semibold hover:text-gray-700 inline-flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -85,37 +111,25 @@
         </a>
     </div>
 
-
     <!-- Main Content -->
     <div class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-white shadow-lg rounded-lg w-full max-w-2xl p-6 flex">
-            <!-- Upload Form -->
-            <form method="post" enctype="multipart/form-data" class="flex-grow mb-4 mr-4 flex flex-col">
-                {% csrf_token %}
-                <input type="file" id="document" name="document" 
-                    accept=".pdf,.docx,.doc,.jpg,.jpeg,.png"
-                    class="border border-gray-300 p-2 rounded-md mb-2 w-full h-12">
-                <button type="submit" class="bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 h-12">
-                    Upload
-                </button>
-            </form>
-        
+        <div class="bg-white shadow-lg rounded-lg w-full max-w-2xl p-6 flex flex-col space-y-4">
             <!-- Search Form -->
-            <form method="post" class="flex-grow mb-4 flex flex-col">
+            <form method="post" class="flex flex-col space-y-4">
                 {% csrf_token %}
                 <input type="text" id="question" name="question" 
                     placeholder="Ask a question..."
-                    class="border border-gray-300 p-2 rounded-md flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500 h-12">
-                <button type="submit" class="bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 h-12 mt-2">
+                    class="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-12">
+                <button type="submit" class="bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 h-12">
                     Search
                 </button>
             </form>
         </div>
     </div>
     
-    <div class="flex flex-wrap justify-center p-4">
-        <div class="flex-grow flex items-start justify-start w-full md:w-1/2 p-2 h-full">
-            <div class="bg-gray-300 items-start shadow-lg rounded-lg w-full p-6 h-full">
+    <div class="flex flex-wrap justify-center p-4 space-y-4 md:space-y-0 md:space-x-4">
+        <div class="flex flex-col items-center w-full md:w-1/2 p-4">
+            <div class="bg-gray-300 items-start shadow-lg rounded-lg w-full p-6">
                 <div class="mt-4 flex flex-col h-full">
                     <h2 class="text-xl font-semibold">Read For Me:</h2>
                     {% if audio_file_url %}
@@ -125,46 +139,40 @@
                     </audio>           
                     {% endif %}
                     <h2 class="mt-4 text-xl font-semibold">Question:</h2>
-                    <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex-grow max-h-24 overflow-y-auto">
+                    <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 max-h-24 overflow-y-auto">
                         <p>{{ question }}</p>
                     </div>
                     <h2 class="text-xl font-semibold mt-4">Step by step solution:</h2>
-                    <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex-grow max-h-72 overflow-y-auto"> 
+                    <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 max-h-72 overflow-y-auto"> 
                         <p>{{ answer }}</p>
                     </div>
                 </div>
             </div>
         </div>
-        <script>
-            function toggleMute() {
-                const audioPlayer = document.getElementById('audioPlayer');
-                audioPlayer.muted = !audioPlayer.muted;  // Toggle mute state
-            }
-        </script>
-        
-        <div class="flex-grow flex items-start justify-start w-full md:w-1/2 p-2 h-full">
-            <div class="bg-gray-300 items-start shadow-lg rounded-lg w-full p-6 h-full">
-                <div class="mt-4 flex flex-col h-full"> 
+
+        <div class="flex flex-col items-center w-full md:w-1/2 p-2">
+            <div class="bg-gray-300 items-start shadow-lg rounded-lg w-full p-6">
+                <div class="mt-4 flex flex-col h-full">
                     {% if video_url %}
-                        <h2 class="text-xl font-semibold mt-4">Tutorial:</h2>
-                        <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex-grow">
-                            <div class="relative w-full h-0" style="padding-bottom: 56.25%;">
-                                <iframe width="100%" height="100%" src="{{ video_url }}" frameborder="0" 
-                                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen class="absolute top-0 left-0 w-full h-full"></iframe>
-                            </div>
+                    <h2 class="text-xl font-semibold mt-4">Tutorial:</h2>
+                    <div class="mt-2 bg-gray-50 p-4 rounded-md border border-gray-200">
+                        <div class="relative w-full h-0" style="padding-bottom: 56.25%;">
+                            <iframe width="100%" height="100%" src="{{ video_url }}" frameborder="0" 
+                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen class="absolute top-0 left-0 w-full h-full"></iframe>
                         </div>
+                    </div>
                     {% else %}
-                        <p class="mt-4">No tutorial video available</p>
-                    {% endif %} 
-                    <a href="{% url 'quiz' %}" class="inline-block px-4 py-2 bg-green-500 text-blue-900 rounded hover:bg-green-600 text-center font-bold">
+                    <p class="mt-4">No tutorial video available</p>
+                    {% endif %}
+                    <a href="{% url 'quiz' %}" class="inline-block px-2 py-2 bg-green-500 text-blue-900 rounded hover:bg-green-600 mt-4 text-center font-bold">
                         Take a Quiz
                     </a>                                        
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Footer Section -->
     <footer class="bg-gray-800 text-white py-12">
         <div class="container mx-auto px-4">
@@ -186,13 +194,13 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <div>
                     <h3 class="text-white text-xl mb-4 font-semibold">Get In Touch</h3>
                     <p class="mb-2 flex items-center"><i class="fas fa-envelope text-blue-400 mr-2"></i>info@example.com</p>
                     <p class="flex items-center"><i class="fas fa-phone text-blue-400 mr-2"></i>+000 000 0000</p>
                 </div>
-                
+
                 <div>
                     <h3 class="text-white text-xl mb-4 font-semibold">Follow Us</h3>
                     <div class="flex space-x-4">
@@ -213,7 +221,7 @@
             </div>
         </div>
     </footer>
-    
+
     <!-- Bottom Section -->
     <div class="bg-gray-900 text-white py-4">
         <div class="container mx-auto px-4">
@@ -223,6 +231,12 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('navbar-toggle').addEventListener('click', function () {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+    </script>
 
 </body>
 </html>
